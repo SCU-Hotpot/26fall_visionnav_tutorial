@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火锅战队视觉组 | OpenCV 核心技能库</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-app: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --accent-blue: #38bdf8; 
+            --accent-orange: #fb923c; /* 火锅橙 */
+            --accent-purple: #a78bfa;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --code-bg: #1e1e2e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-app);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(251, 146, 60, 0.1), transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 4rem 1rem 2rem;
+            background: linear-gradient(to bottom, rgba(15,23,42,0.9), transparent);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(251, 146, 60, 0.15);
+            color: var(--accent-orange);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            border: 1px solid var(--accent-orange);
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p { color: var(--text-sub); font-size: 1.1rem; }
+
+        /* Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* Section Titles */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin: 4rem 0 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.1);
+            margin-right: 1rem;
+        }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--accent-blue); }
+        .section-desc { margin-left: auto; font-size: 0.9rem; color: var(--text-sub); display: none; }
+        @media(min-width: 768px) { .section-desc { display: block; } }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-sub);
+            font-weight: normal;
+        }
+
+        .card p { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 1rem; }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .code-header {
+            background: #0f172a;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        /* Syntax Colors */
+        .k { color: #c678dd; } /* purple */
+        .f { color: #61afef; } /* blue */
+        .s { color: #98c379; } /* green */
+        .c { color: #7f848e; font-style: italic; } /* comment */
+        .n { color: #d19a66; } /* orange */
+
+        /* Copy Button */
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: var(--accent-blue); color: #fff; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding: 2rem;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="badge">ROBOMASTER VISION</div>
+    <h1>火锅战队视觉组 | 核心技能库</h1>
+    <p>从基础操作到高级形态学处理，打造无懈可击的视觉系统。</p>
+</header>
+
+<div class="container">
+
+    <div class="section-header">
+        <div class="section-number">01</div>
+        <div class="section-title">备菜阶段：基础 I/O 与几何</div>
+        <div class="section-desc">先把食材洗好、切好，准备下锅。</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>读取、显示与保存 <span class="tag">Basic</span></h3>
+            <p>OpenCV 世界的 Hello World。记住：imread 读入的格式是 <b>BGR</b>。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+<span class="c"># 1. 读取 (1=Color, 0=Gray)</span>
+img = cv2.imread(<span class="s">'test.jpg'</span>, <span class="n">1</span>)
+
+<span class="c"># 2. 显示</span>
+cv2.imshow(<span class="s">'Window'</span>, img)
+cv2.waitKey(<span class="n">0</span>)
+
+<span class="c"># 3. 保存</span>
+cv2.imwrite(<span class="s">'saved.jpg'</span>, img)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>颜色空间转换 <span class="tag">Color</span></h3>
+            <p><b>Gray</b>：二值化前的必经之路。<br><b>HSV</b>：识别特定颜色（如装甲板红蓝灯条）的最佳空间。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+img = cv2.imread(<span class="s">'img.jpg'</span>)
+
+<span class="c"># BGR 转 灰度</span>
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+<span class="c"># BGR 转 HSV</span>
+hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>通道分离 (Split) <span class="tag">Color</span></h3>
+            <p>拆分 B/G/R 通道。例如识别蓝色装甲板时，B通道的值会显著高于R通道。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+img = cv2.imread(<span class="s">'img.jpg'</span>)
+b, g, r = cv2.split(img)
+
+<span class="c"># 显示蓝色通道 (白色代表蓝色分量高)</span>
+cv2.imshow(<span class="s">'Blue Channel'</span>, b)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>剪裁、缩放与旋转 <span class="tag">Geometry</span></h3>
+            <p>ROI (感兴趣区域) 能大幅减少计算量。缩放和旋转用于数据增强或对齐。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+img = cv2.imread(<span class="s">'img.jpg'</span>)
+
+<span class="c"># 1. 缩放 Resize (宽, 高)</span>
+resized = cv2.resize(img, (<span class="n">400</span>, <span class="n">300</span>))
+
+<span class="c"># 2. ROI 剪裁 [y:y+h, x:x+w]</span>
+roi = img[<span class="n">0</span>:<span class="n">200</span>, <span class="n">100</span>:<span class="n">300</span>]
+
+<span class="c"># 3. 旋转 (中心, 角度, 缩放)</span>
+h, w = img.shape[:<span class="n">2</span>]
+M = cv2.getRotationMatrix2D((w//<span class="n">2</span>, h//<span class="n">2</span>), <span class="n">45</span>, <span class="n">1.0</span>)
+rotated = cv2.warpAffine(img, M, (w, h))</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>图像翻转 (Flip) <span class="tag">Geometry</span></h3>
+            <p>沿轴线翻转图像。常用于数据增强，或者校正安装反了的摄像头画面。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+img = cv2.imread(<span class="s">'img.jpg'</span>)
+
+<span class="c"># 1 = 水平翻转 (左右互换)</span>
+<span class="c"># 0 = 垂直翻转 (上下互换)</span>
+<span class="c"># -1 = 水平+垂直同时翻转</span>
+flipped = cv2.flip(img, <span class="n">1</span>)
+
+cv2.imshow(<span class="s">'Flipped'</span>, flipped)</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <div class="section-number">02</div>
+        <div class="section-title">火候控制：平滑与去噪</div>
+        <div class="section-desc">汤底要纯净。不同的模糊算法用于去除不同类型的噪点。</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>高斯 vs 中值 vs 双边 <span class="tag" style="color:#fb923c">Important</span></h3>
+            <p>
+                1. <b>高斯</b>：通用去噪。<br>
+                2. <b>中值</b>：专治椒盐噪声（黑白杂点）。<br>
+                3. <b>双边</b>：保留边缘的磨皮（最慢但效果最好）。
+            </p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+img = cv2.imread(<span class="s">'noisy.jpg'</span>)
+
+<span class="c"># 1. 高斯模糊 (核大小必须奇数)</span>
+gauss = cv2.GaussianBlur(img, (<span class="n">5</span>,<span class="n">5</span>), <span class="n">0</span>)
+
+<span class="c"># 2. 中值模糊 (去除椒盐噪点)</span>
+median = cv2.medianBlur(img, <span class="n">5</span>)
+
+<span class="c"># 3. 双边滤波 (保留边缘的同时模糊)</span>
+<span class="c"># 参数: d(邻域直径), sigmaColor(颜色差), sigmaSpace(距离差)</span>
+bilateral = cv2.bilateralFilter(img, <span class="n">9</span>, <span class="n">75</span>, <span class="n">75</span>)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>二值化 (Thresholding) <span class="tag">Binary</span></h3>
+            <p>将图像转为黑白。<b>Otsu (大津法)</b> 能自动寻找最合适的阈值，适应光照变化。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+<span class="c"># 必须先转灰度!</span>
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+<span class="c"># 1. 手动阈值 (大于127变255)</span>
+ret, bin1 = cv2.threshold(gray, <span class="n">127</span>, <span class="n">255</span>, cv2.THRESH_BINARY)
+
+<span class="c"># 2. Otsu 自动阈值 (设为0, 开启flag)</span>
+ret, bin_otsu = cv2.threshold(gray, <span class="n">0</span>, <span class="n">255</span>, 
+                              cv2.THRESH_BINARY + cv2.THRESH_OTSU)</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <div class="section-number">03</div>
+        <div class="section-title">精细加工：形态学与特征</div>
+        <div class="section-desc">调整形状，提取轮廓，这是识别装甲板的关键。</div>
+    </div>
+
+    <div class="grid">
+        <div class="card" style="border-color: rgba(167, 139, 250, 0.3);">
+            <h3><span style="color:var(--accent-purple)">⚡</span> 膨胀与腐蚀 (Morphology)</h3>
+            <p>基于二值图的操作。<br>
+            <b>腐蚀 (Erode)</b>：去毛刺，把东西变瘦，断开连接。<br>
+            <b>膨胀 (Dilate)</b>：填空洞，把东西变胖，连接断裂。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+<span class="k">import</span> numpy <span class="k">as</span> np
+
+<span class="c"># 定义核 (Kernel)，就像一个 5x5 的扫描窗口</span>
+kernel = np.ones((<span class="n">5</span>,<span class="n">5</span>), np.uint8)
+
+<span class="c"># 腐蚀：去除细小噪点</span>
+erosion = cv2.erode(bin_otsu, kernel, iterations=<span class="n">1</span>)
+
+<span class="c"># 膨胀：连接断裂的灯条</span>
+dilation = cv2.dilate(bin_otsu, kernel, iterations=<span class="n">1</span>)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Canny 边缘检测 <span class="tag">Edge</span></h3>
+            <p>经典的边缘提取算法。推荐步骤：<b>高斯模糊 -> Canny</b>，以减少噪点造成的假边缘。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+<span class="c"># 先模糊</span>
+blur = cv2.GaussianBlur(gray, (<span class="n">3</span>,<span class="n">3</span>), <span class="n">0</span>)
+
+<span class="c"># 边缘检测 (最小阈值50, 最大阈值150)</span>
+edges = cv2.Canny(blur, <span class="n">50</span>, <span class="n">150</span>)
+
+cv2.imshow(<span class="s">'Edges'</span>, edges)</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>轮廓检测 (Contours) <span class="tag">Shape</span></h3>
+            <p>在二值图中找形状。<code>findContours</code> 会改变原图结构（在旧版中），建议传入副本。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+<span class="c"># RETR_EXTERNAL: 只找外轮廓</span>
+contours, hier = cv2.findContours(bin_otsu, 
+                                  cv2.RETR_EXTERNAL, 
+                                  cv2.CHAIN_APPROX_SIMPLE)
+
+<span class="c"># 绘制所有轮廓 (绿色, 线宽2)</span>
+out = img.copy()
+cv2.drawContours(out, contours, <span class="n">-1</span>, (<span class="n">0</span>,<span class="n">255</span>,<span class="n">0</span>), <span class="n">2</span>)</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <div class="section-number">04</div>
+        <div class="section-title">最终摆盘：视频流实战</div>
+        <div class="section-desc">将所有技术整合，处理动态画面。</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>绘制文字和图形 <span class="tag">UI</span></h3>
+            <p>在画面上打标。注意：<code>putText</code> 不支持中文，需要特殊库才行。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="c"># 画矩形 (img, pt1, pt2, color, thickness)</span>
+cv2.rectangle(img, (<span class="n">50</span>,<span class="n">50</span>), (<span class="n">200</span>,<span class="n">200</span>), (<span class="n">0</span>,<span class="n">0</span>,<span class="n">255</span>), <span class="n">2</span>)
+
+<span class="c"># 画圆 (img, center, radius, color, thickness=-1填充)</span>
+cv2.circle(img, (<span class="n">300</span>,<span class="n">300</span>), <span class="n">50</span>, (<span class="n">255</span>,<span class="n">0</span>,<span class="n">0</span>), <span class="n">-1</span>)
+
+<span class="c"># 写字</span>
+cv2.putText(img, <span class="s">'Target'</span>, (<span class="n">50</span>,<span class="n">40</span>), 
+            cv2.FONT_HERSHEY_SIMPLEX, <span class="n">1</span>, (<span class="n">0</span>,<span class="n">255</span>,<span class="n">0</span>), <span class="n">2</span>)</code></pre>
+            </div>
+        </div>
+
+        <div class="card" style="border-color: var(--accent-orange);">
+            <h3>📹 视频流 + 实时 Otsu <span class="tag" style="background:var(--accent-orange);color:#fff;">BOSS</span></h3>
+            <p>读取摄像头，实时转灰度并二值化。这是测试现场光照是否影响阈值计算的最佳Demo。</p>
+            <div class="code-block">
+                <div class="code-header">Python <button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+<pre><code><span class="k">import</span> cv2
+
+cap = cv2.VideoCapture(<span class="n">0</span>) <span class="c"># 0号摄像头</span>
+
+<span class="k">while</span> <span class="k">True</span>:
+    ret, frame = cap.read()
+    <span class="k">if not</span> ret: <span class="k">break</span>
+
+    <span class="c"># 实时处理流程</span>
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+    <span class="c"># Otsu 二值化</span>
+    _, binary = cv2.threshold(gray, <span class="n">0</span>, <span class="n">255</span>, 
+                              cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    cv2.imshow(<span class="s">'Realtime Otsu'</span>, binary)
+    cv2.imshow(<span class="s">'Origin'</span>, frame)
+
+    <span class="c"># 按 'q' 退出</span>
+    <span class="k">if</span> cv2.waitKey(<span class="n">1</span>) & <span class="n">0xFF</span> == <span class="f">ord</span>(<span class="s">'q'</span>):
+        <span class="k">break</span>
+
+cap.release()
+cv2.destroyAllWindows()</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🔥 火锅战队视觉组内部资料 | <b>沸腾不息，火力全开！</b></p>
+    </footer>
+
+</div>
+
+<script>
+    function copyCode(btn) {
+        const pre = btn.closest('.code-header').nextElementSibling;
+        const code = pre.innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = "已复制";
+            btn.style.color = "#38bdf8";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.color = "";
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
